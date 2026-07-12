@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chúc Mừng Sinh Nhật Bảo Bối - Ngô Kiều Vân ❤️</title>
+  <meta name="description" content="Trang sinh nhật đặc biệt dành riêng cho Ngô Kiều Vân - Người con gái đặc biệt nhất." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════
+       CANVASES (behind everything)
+  ════════════════════════════════════════════ -->
+  <canvas id="particle-canvas"></canvas>
+  <canvas id="webgl-canvas"></canvas>
+
+  <!-- ═══════════════════════════════════════════
+       STAGE 1 — THE GATEKEEPER (Flowing Heart)
+  ════════════════════════════════════════════ -->
+  <div id="stage-1" class="stage active">
+    <div class="glass-modal" id="glass-modal">
+      <div class="modal-sparkle modal-sparkle--1" aria-hidden="true">✦</div>
+      <div class="modal-sparkle modal-sparkle--2" aria-hidden="true">♥</div>
+      <div class="modal-sparkle modal-sparkle--3" aria-hidden="true">✦</div>
+      <h2 class="modal-title">Em có yêu anh không???</h2>
+      <p class="modal-subtitle">Hãy chọn câu trả lời nhé 💕</p>
+      <div class="modal-buttons">
+        <button id="btn-yes" class="btn btn--yes">
+          <span class="btn__icon">💖</span>
+          <span>Có</span>
+        </button>
+        <button id="btn-no" class="btn btn--no">Không</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       STAGE 2 — THE HEART PLANET (3D Scene)
+       pointer-events: none on the overlay so
+       raycaster clicks pass through to the canvas.
+       Only buttons/text receive pointer events.
+  ════════════════════════════════════════════ -->
+  <div id="stage-2" class="stage">
+
+    <!-- ═══════ ONBOARDING MODAL ═══════ -->
+    <div id="onboarding-modal" class="onboarding">
+      <div class="onboarding__card">
+        <div class="onboarding__sparkle onboarding__sparkle--1" aria-hidden="true">✦</div>
+        <div class="onboarding__sparkle onboarding__sparkle--2" aria-hidden="true">★</div>
+        <div class="onboarding__sparkle onboarding__sparkle--3" aria-hidden="true">✦</div>
+        <div class="onboarding__sparkle onboarding__sparkle--4" aria-hidden="true">♥</div>
+
+        <h2 class="onboarding__title">Gửi Kiều Vân: Hướng dẫn Khám phá<br/>Vũ trụ của chúng mình ✨</h2>
+
+        <div class="onboarding__steps">
+          <div class="onboarding__step">
+            <div class="onboarding__icon">👆</div>
+            <div class="onboarding__text">
+              <strong>1. Xoay và khám phá:</strong> Chạm và kéo (hoặc giữ chuột) để xoay Hành tinh Trái tim và nhìn vành đai ảnh từ mọi góc độ. <em>(Drag to rotate)</em>
+            </div>
+          </div>
+          <div class="onboarding__step">
+            <div class="onboarding__icon">🖼️</div>
+            <div class="onboarding__text">
+              <strong>2. Xem rõ kỷ niệm:</strong> Nhấn vào bất kỳ bức ảnh nào trên vành đai để phóng to và xem lại những khoảnh khắc của chúng mình. <em>(Click to zoom)</em>
+            </div>
+          </div>
+          <div class="onboarding__step">
+            <div class="onboarding__icon">🎁</div>
+            <div class="onboarding__text">
+              <strong>3. Nhận quà:</strong> Khi xem xong, nhấn nút 'Khám phá món quà sinh nhật' bên dưới để đến trang chúc mừng chính. <em>(Unlock gift)</em>
+            </div>
+          </div>
+        </div>
+
+        <button id="btn-onboarding-dismiss" class="onboarding__btn">
+          Em đã hiểu! Bắt đầu khám phá ✨
+        </button>
+      </div>
+    </div>
+
+    <!-- Back button — shown when zoomed into a photo -->
+    <button id="btn-back" class="btn-back hidden">
+      <span aria-hidden="true">←</span> Quay lại
+    </button>
+
+    <div class="stage2-overlay">
+      <p class="stage2-text">Một hành tinh mang tên tình yêu của chúng mình... 🪐</p>
+      <p class="stage2-hint">💡 Nhấn vào ảnh để xem rõ hơn nhé</p>
+      <button id="btn-discover" class="btn-glow">
+        <span class="btn-glow__sparkle" aria-hidden="true">✨</span>
+        Khám phá món quà sinh nhật
+        <span class="btn-glow__sparkle" aria-hidden="true">✨</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       STAGE 3 — MAIN LANDING PAGE
+  ════════════════════════════════════════════ -->
+  <div id="stage-3" class="stage">
+    <!-- HERO -->
+    <section id="hero" class="hero">
+      <div class="hero__particles" aria-hidden="true"></div>
+      <div class="hero__content">
+        <div class="hero__badge">🎂 25 / 07</div>
+        <h1 class="hero__title">
+          <span style="white-space: nowrap;">Chúc Mừng Sinh Nhật Bảo Bối</span>
+          <span class="hero__name">Ngô Kiều Vân</span>
+          <span class="hero__date">( 25/07 ) ! ❤️</span>
+        </h1>
+        <p class="hero__subtitle">
+          Hôm nay là một ngày đặc biệt của một người đặc biệt...
+        </p>
+        <button id="hero-cta" class="hero__cta" aria-label="Cuộn xuống để xem bất ngờ">
+          <span class="hero__cta-text">Nhấn vào đây để xem điều bất ngờ nhé!</span>
+          <span class="hero__cta-icon" aria-hidden="true">↓</span>
+        </button>
+      </div>
+      <div class="hero__scroll-hint" aria-hidden="true">
+        <div class="hero__mouse"><div class="hero__mouse-wheel"></div></div>
+      </div>
+    </section>
+
+    <!-- LOVE LETTER -->
+    <section id="letter" class="letter">
+      <div class="section__header">
+        <span class="section__tag">💌 Thư tình</span>
+        <h2 class="section__title">Lời Muốn Nói Với Em</h2>
+      </div>
+      <div class="letter__envelope" data-reveal>
+        <div class="letter__card">
+          <div class="letter__seal" aria-hidden="true">♥</div>
+          <div class="letter__body">
+            <p class="letter__greeting">Gửi em yêu, Kiều Vân ♥</p>
+            <p>Hôm nay là ngày sinh nhật của em — ngày mà thế giới này được đón nhận một người tuyệt vời như em. Anh muốn em biết rằng, em chính là điều tuyệt vời nhất mà cuộc sống đã mang đến cho anh.</p>
+            <p>Cảm ơn em vì đã kiên nhẫn, vì đã yêu thương, vì đã là chính em — người con gái khiến trái tim anh đập nhanh hơn mỗi ngày.</p>
+            <p>Anh chúc em một ngày sinh nhật thật hạnh phúc, thật nhiều niềm vui và tiếng cười. Chúc em luôn bình an, khỏe mạnh, và mãi xinh đẹp rạng ngời như vậy nhé.</p>
+            <p>Dù cuộc sống có bao nhiêu thử thách, anh hứa sẽ luôn ở bên em, cùng em đi qua mọi chặng đường. Vì em chính là nhà, là bình yên, là tất cả những gì anh cần.</p>
+            <p class="letter__closing">Yêu em nhiều lắm, hôm nay và mãi mãi. 💗</p>
+            <p class="letter__signature">— Nguyễn Gia Phú —</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <p>Made with <span class="footer__heart">❤️</span> for <strong>Ngô Kiều Vân</strong></p>
+      <p class="footer__year">🎂 Happy Birthday 25/07 🎂</p>
+    </footer>
+  </div>
+
+  <!-- FLOATING MUSIC PLAYER (always visible once music starts) -->
+  <div id="music-player" class="music-player" role="region" aria-label="Trình phát nhạc nền">
+    <audio id="bg-music" loop preload="auto">
+      <source src="assets/birthday-song.mp3" type="audio/mpeg" />
+    </audio>
+    <button id="music-toggle" class="music-player__btn" aria-label="Bật/Tắt nhạc nền" title="Bật/Tắt nhạc nền">
+      <span class="music-player__icon music-player__icon--play" aria-hidden="true">♫</span>
+      <span class="music-player__icon music-player__icon--pause" aria-hidden="true">⏸</span>
+      <span class="music-player__ripple" aria-hidden="true"></span>
+    </button>
+    <div class="music-player__visualizer" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <!-- Scripts: particles (Stage 1), scene3d (Stage 2), main orchestrator -->
+  <script src="js/particles.js"></script>
+  <script src="js/scene3d.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
